@@ -9,7 +9,7 @@ public class obtaclescript : MonoBehaviour
         if (collision.gameObject.CompareTag("Player"))
         {
             Time.timeScale = 0f;
-            print("morri" + Time.timeScale);
+            print("morri");
         }
     }
 }

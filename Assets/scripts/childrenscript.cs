@@ -19,9 +19,9 @@ public class childrenscript : MonoBehaviour
 
         while (true && creados <= 0)
         {
-            yield return new WaitForSeconds(10);
+            yield return new WaitForSeconds(3.5f);
 
-            Instantiate(target, new Vector2(target.transform.position.x + 10, target.transform.position.y), target.transform.rotation);
+            Instantiate(target, new Vector2(target.transform.position.x + 20, target.transform.position.y), target.transform.rotation);
             creados = 1;
             yield return new WaitForSeconds(30);
             DestroyImmediate(target.gameObject);
