@@ -17,10 +17,10 @@ public class moviment : MonoBehaviour
     void Update()
     {
         Application.targetFrameRate = 30;
-        rb.AddForce(new Vector2(6.5f, 0));
+        rb.AddForce(new Vector2(225f * Time.deltaTime, 0));
         if (isPiso && Input.GetKeyDown(KeyCode.Space))
         {
-            rb.AddForce(transform.up * force);
+            rb.AddForce(new Vector2(0, force * Time.deltaTime));
 
         }
     }
