@@ -13,6 +13,6 @@ public class moviment_fondo : MonoBehaviour
     }
     void Update()
     {
-        gameObject.transform.position = new Vector2(player.gameObject.transform.position.x - force, -2.25f);
+        gameObject.transform.position = new Vector2(player.gameObject.transform.position.x - force, player.gameObject.transform.position.y - force);
     }
 }

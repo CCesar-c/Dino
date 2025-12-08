@@ -42,3 +42,6 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: fondo
+    uniqueID: 2278957615
+    locked: 0
