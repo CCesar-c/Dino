@@ -16,12 +16,11 @@ public class moviment : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Application.targetFrameRate = 30;
+        Application.targetFrameRate = 60;
         rb.AddForce(new Vector2(225f * Time.deltaTime, 0));
         if (isPiso && Input.GetKeyDown(KeyCode.Space))
         {
             rb.AddForce(new Vector2(0, force * Time.deltaTime));
-
         }
     }
 
