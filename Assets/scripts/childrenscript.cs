@@ -5,6 +5,7 @@ using UnityEngine;
 public class childrenscript : MonoBehaviour
 {
     public GameObject target;
+    public GameObject Pedra;
     void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Player"))
@@ -16,12 +17,11 @@ public class childrenscript : MonoBehaviour
 
     public IEnumerator gerarlospisos()
     {
-
-        while (true && creados <= 0)
+        while (creados <= 0)
         {
-            yield return new WaitForSeconds(1.5f);
+            yield return new WaitForSeconds(0f);
 
-            Instantiate(target, new Vector2(target.transform.position.x + 20, target.transform.position.y), target.transform.rotation);
+            var parent = Instantiate(target, new Vector2(target.transform.position.x + 20, target.transform.position.y), target.transform.rotation);
             creados = 1;
             yield return new WaitForSeconds(30);
             DestroyImmediate(target.gameObject);
