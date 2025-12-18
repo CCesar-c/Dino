@@ -14,14 +14,16 @@ public class Moviment : MonoBehaviour
     public bool isPiso;
     public bool estoyVivo = true;
     public int tim;
+    public Animator anim;
 
     void Start()
     {
+        // GetComponent<SpriteRenderer>().sprite = GameManager.instance.spr[GameManager.instance.index];
+        anim.SetInteger("typoAnim", 0);
         StartCoroutine(nameof(Relog));
         rb = GetComponent<Rigidbody2D>();
         ps = GetComponent<ParticleSystem>();
         ps.Stop();
-
     }
     Vector2 calculo = Vector2.right;
     public float maxSpeed = 10f;
@@ -60,15 +62,14 @@ public class Moviment : MonoBehaviour
 
 
             GameObject text_Bestime = GameObject.Find("Text1");
-
-            for (int i = 0; i < GameManager.instance.lista.players.Length; i++)
+            foreach (var item in GameManager.instance.lista.players)
             {
-                if (GameManager.instance.lista.players[i].name == GameManager.instance.Nome)
+                if (item.name == GameManager.instance.Nome)
                 {
-                    text_Bestime.GetComponent<Text>().text = "Best score: " + GameManager.instance.lista.players[i].score;
+                    text_Bestime.GetComponent<Text>().text = "Best score: " + item.score;
                 }
             }
-            text_time.GetComponent<Text>().text = tim.ToString("score: " + tim);
+            text_time.GetComponent<Text>().text = "score: " + tim;
         }
     }
     public void GobackScene()

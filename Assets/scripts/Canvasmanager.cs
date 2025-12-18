@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class Canvasmanager : MonoBehaviour
 {
@@ -15,12 +16,14 @@ public class Canvasmanager : MonoBehaviour
     public GameObject ParentRank;
     public GameObject Parentskin;
     public GameObject ParentHome;
+    public RawImage preview;
     int homestate = 0;
 
     void Start()
     {
         try
         {
+            GameManager.instance.cargarImg(preview);
             // PlayerPrefs.DeleteKey("nomeP");
             StartCoroutine(nameof(setValores));
             var nome = PlayerPrefs.GetString("nomeP", "");
@@ -53,6 +56,29 @@ public class Canvasmanager : MonoBehaviour
         homestate = i;
     }
     int ejecutados = 0;
+    Texture2D texture;
+    byte[] bytes;
+
+    public void PickImage()
+    {
+        NativeGallery.GetImageFromGallery((path) =>
+        {
+            if (path == null)
+            {
+                Debug.Log("Usuario canceló");
+                return;
+            }
+            texture = NativeGallery.LoadImageAtPath(path, 1024);
+            preview.texture = texture;
+            bytes = File.ReadAllBytes(path);
+            Debug.Log("Ruta de la imagen: " + path + "\n" + bytes.Length);
+        }, "Selecciona una foto");
+    }
+
+    public void SaveImage()
+    {
+        GameManager.instance.StartUploadStorage(bytes);
+    }
     public void createTextRank()
     {
         if (ejecutados == 0)
@@ -60,7 +86,11 @@ public class Canvasmanager : MonoBehaviour
             var listaordenada = GameManager.instance.lista.players.OrderByDescending(p => p.score).ToList();
             for (int i = 0; i < listaordenada.Count; i++)
             {
-                var newText = Instantiate(ParentRank.transform.GetChild(0), new Vector2(ParentRank.transform.GetChild(0).position.x, ParentRank.transform.GetChild(0).position.y - 50 * i), ParentRank.transform.GetChild(i).transform.rotation, ParentRank.transform);
+                var newText = Instantiate(
+                    ParentRank.transform.GetChild(0).transform.GetChild(0).transform.GetChild(0).transform.GetChild(0),
+                    new Vector2(
+                        ParentRank.transform.GetChild(0).transform.GetChild(0).transform.GetChild(0).transform.GetChild(0).position.x,
+                        ParentRank.transform.GetChild(0).transform.GetChild(0).transform.GetChild(0).transform.GetChild(0).position.y - 50 * i), ParentRank.transform.GetChild(0).transform.GetChild(0).transform.GetChild(0).transform.GetChild(0).transform.rotation, ParentRank.transform.GetChild(0).transform.GetChild(0).transform.GetChild(0));
                 newText.GetComponent<Text>().text = $"Nome: {listaordenada[i].name}\nScore: {listaordenada[i].score}";
             }
             ejecutados = 1;

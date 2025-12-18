@@ -19,7 +19,7 @@ public class childrenscript : MonoBehaviour
     {
         while (creados <= 0)
         {
-            yield return new WaitForSeconds(0f);
+            yield return new WaitForSeconds(2f);
 
             var parent = Instantiate(target, new Vector2(target.transform.position.x + 20, target.transform.position.y), target.transform.rotation);
             creados = 1;

@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -27,7 +28,7 @@ public class GameManager : MonoBehaviour
     }
     void Start()
     {
-        Application.targetFrameRate = 60;
+        Application.targetFrameRate = 45;
         Nome = PlayerPrefs.GetString("nomeP");
         StartCoroutine(SelectPlayers());
     }
@@ -35,6 +36,69 @@ public class GameManager : MonoBehaviour
     [HideInInspector] public string supabaseUrl = "https://mtpvcaekijuaessqkykm.supabase.co";
     [HideInInspector] public string anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im10cHZjYWVraWp1YWVzc3FreWttIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExNTQxMDAsImV4cCI6MjA3NjczMDEwMH0.MrohDyIoolSw-yMy70Y2L40CsmJR5lnJMxM6DlUVwFo";
     [HideInInspector] public PlayerDinoList lista;
+    int res;
+    int newtime;
+    string bucket = "images";
+
+    void LateUpdate()
+    {
+        if (SceneManager.GetActiveScene().name == "SampleScene")
+        {
+            pl = GameObject.Find("player");
+        }
+    }
+    public void reloadScene()
+    {
+        SceneManager.LoadScene("SampleScene");
+    }
+
+    public void StartUpdateMoney()
+    {
+        foreach (var item in lista.players)
+        {
+            if (item.name == Nome)
+            {
+                newtime = Mathf.Max(pl.GetComponent<Moviment>().tim, item.score);
+                res = item.moneycount + MoneyCount;
+
+                StartCoroutine(UpdateMoney(res, newtime));
+                break;
+            }
+        }
+    }
+
+    public void StartUploadStorage(byte[] bytes)
+    {
+        foreach (var item in lista.players)
+        {
+            if (item.name == Nome)
+            {
+                StartCoroutine(UploadImage(bytes));
+                break;
+            }
+        }
+    }
+
+    [System.Serializable]
+    public class PlayerDino
+    {
+        public int id;
+        public string name;
+        public int moneycount;
+        public int score;
+    }
+
+    [System.Serializable]
+    public class PlayerDinoList
+    {
+        public PlayerDino[] players;
+    }
+    [System.Serializable]
+    public class UpdateData
+    {
+        public int moneycount;
+        public int score;
+    }
     IEnumerator SelectPlayers()
     {
         // SELECT * FROM players ORDER BY score DESC
@@ -63,37 +127,6 @@ public class GameManager : MonoBehaviour
             lista = JsonUtility.FromJson<PlayerDinoList>(wrappedJson);
         }
     }
-
-    void LateUpdate()
-    {
-        if (SceneManager.GetActiveScene().name == "SampleScene")
-        {
-            pl = GameObject.Find("player");
-            pl.GetComponent<SpriteRenderer>().sprite = spr[index];
-
-        }
-    }
-    public void reloadScene()
-    {
-        SceneManager.LoadScene("SampleScene");
-    }
-    int res;
-    int newtime;
-    public void StartUpdateMoney()
-    {
-        for (int i = 0; i < lista.players.Length; i++)
-        {
-            if (lista.players[i].name == Nome)
-            {
-                newtime = Mathf.Max(pl.GetComponent<Moviment>().tim, lista.players[i].score);
-                res = lista.players[i].moneycount + MoneyCount;
-
-                StartCoroutine(UpdateMoney(res, newtime));
-                break;
-            }
-        }
-    }
-
     IEnumerator UpdateMoney(int newMoney, int newscore)
     {
         string url = supabaseUrl +
@@ -129,26 +162,62 @@ public class GameManager : MonoBehaviour
             Debug.Log("UPDATE OK");
         }
     }
-
-    [System.Serializable]
-    public class PlayerDino
+    IEnumerator UploadImage(byte[] bytes)
     {
-        public int id;
-        public string name;
-        public int moneycount;
-        public int score;
+        string fileName = $"imgProfile{Nome}.png";
+        string uploadUrl =
+            supabaseUrl +
+            "/storage/v1/object/" +
+            bucket + "/" +
+            fileName;
+
+        UnityWebRequest req = new UnityWebRequest(uploadUrl, "POST");
+        req.uploadHandler = new UploadHandlerRaw(bytes);
+        req.downloadHandler = new DownloadHandlerBuffer();
+
+        req.SetRequestHeader("Authorization", "Bearer " + anonKey);
+        req.SetRequestHeader("apikey", anonKey);
+        req.SetRequestHeader("Content-Type", "image/png");
+
+        yield return req.SendWebRequest();
+
+        if (req.isNetworkError || req.isHttpError)
+        {
+            Debug.LogError("❌ Error al subir: " + req.error);
+            yield break;
+        }
+
+        Debug.Log("✅ Imagen subida correctamente");
     }
 
-    [System.Serializable]
-    public class PlayerDinoList
+    IEnumerator DownloadImage(string fileName, Action<Texture2D> onLoaded)
     {
-        public PlayerDino[] players;
-    }
-    [System.Serializable]
-    public class UpdateData
-    {
-        public int moneycount;
-        public int score;
-    }
+        string imageUrl =
+            supabaseUrl +
+            "/storage/v1/object/public/" +
+            bucket + "/" +
+            fileName;
 
+        UnityWebRequest req = UnityWebRequestTexture.GetTexture(imageUrl);
+        yield return req.SendWebRequest();
+
+        if (req.isNetworkError || req.isHttpError)
+        {
+            Debug.LogError(req.error);
+            onLoaded(null);
+            yield break;
+        }
+
+        onLoaded(DownloadHandlerTexture.GetContent(req));
+    }
+    public void cargarImg(RawImage preview)
+    {
+        string fileName = $"imgProfile{Nome}.png";
+
+        StartCoroutine(DownloadImage(fileName, (tex) =>
+        {
+            if (tex != null)
+                preview.texture = tex;
+        }));
+    }
 }
